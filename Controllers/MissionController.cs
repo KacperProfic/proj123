@@ -62,7 +62,7 @@ public class MissionController : Controller
     // DELETE: api/mission/5 (requires login)
     [HttpDelete("{id}")]
     [Authorize]
-    public async Task<IActionResult> DeleteMission(int id)
+    public async Task<IActionResult> DeleteMission(long id)
     {
         var mission = await _context.Missions.FindAsync(id);
         if (mission == null) return NotFound();
@@ -74,8 +74,8 @@ public class MissionController : Controller
     // GET: api/mission/filter?status=1 (requires login)
     [HttpGet("filter")]
     [Authorize]
-    public async Task<ActionResult<IEnumerable<Mission>>> FilterMissions(int status)
+    public async Task<ActionResult<IEnumerable<Mission>>> FilterMissions([FromQuery(Name = "missionStatusId")] int missionStatusId)
     {
-        return await _context.Missions.Where(m => m.MissionStatusId == status).ToListAsync();
+        return await _context.Missions.Where(m => m.MissionStatusId == missionStatusId).ToListAsync();
     }
 }
