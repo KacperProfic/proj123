@@ -70,12 +70,68 @@ public class MissionController : Controller
         await _context.SaveChangesAsync();
         return NoContent();
     }
-
-    // GET: api/mission/filter?status=1 
-    [HttpGet("filter")]
-    [Authorize]
-    public async Task<ActionResult<IEnumerable<Mission>>> FilterMissions([FromQuery(Name = "missionStatusId")] int missionStatusId)
+    
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetPagedMissions(
+        int pageNumber = 1,
+        int pageSize = 10,
+        string? sortBy = null,
+        string? sortDir = "asc",
+        string? company = null,
+        string? missionName = null,
+        int? missionStatusId = null)
     {
-        return await _context.Missions.Where(m => m.MissionStatusId == missionStatusId).ToListAsync();
+        var query = _context.Missions.AsQueryable();
+        if (!string.IsNullOrEmpty(company))
+            query = query.Where(m => m.Company.Contains(company));
+        if (!string.IsNullOrEmpty(missionName))
+            query = query.Where(m => m.MissionName.Contains(missionName));
+        if (missionStatusId.HasValue)
+            query = query.Where(m => m.MissionStatusId == missionStatusId.Value);
+
+        // Sortowanie
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            if (sortBy.ToLower() == "launchdate")
+                query = sortDir == "desc" ? query.OrderByDescending(m => m.LaunchDate) : query.OrderBy(m => m.LaunchDate);
+            else if (sortBy.ToLower() == "missionname")
+                query = sortDir == "desc" ? query.OrderByDescending(m => m.MissionName) : query.OrderBy(m => m.MissionName);
+            else if (sortBy.ToLower() == "company")
+                query = sortDir == "desc" ? query.OrderByDescending(m => m.Company) : query.OrderBy(m => m.Company);
+            // Dodaj inne sortowania jeśli chcesz
+        }
+        else
+        {
+            query = query.OrderBy(m => m.Id);
+        }
+
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+        string baseUrl = $"/api/Mission/paged?pageSize={pageSize}";
+        if (!string.IsNullOrEmpty(sortBy)) baseUrl += $"&sortBy={sortBy}";
+        if (!string.IsNullOrEmpty(sortDir)) baseUrl += $"&sortDir={sortDir}";
+        if (!string.IsNullOrEmpty(company)) baseUrl += $"&company={company}";
+        if (!string.IsNullOrEmpty(missionName)) baseUrl += $"&missionName={missionName}";
+        if (missionStatusId.HasValue) baseUrl += $"&missionStatusId={missionStatusId}";
+
+        var links = new
+        {
+            first = totalPages > 0 ? $"{baseUrl}&pageNumber=1" : null,
+            prev = pageNumber > 1 ? $"{baseUrl}&pageNumber={pageNumber - 1}" : null,
+            next = pageNumber < totalPages ? $"{baseUrl}&pageNumber={pageNumber + 1}" : null,
+            last = totalPages > 0 ? $"{baseUrl}&pageNumber={totalPages}" : null
+        };
+
+        return Ok(new
+        {
+            items,
+            pageNumber,
+            pageSize,
+            totalPages,
+            totalCount,
+            links
+        });
     }
 }

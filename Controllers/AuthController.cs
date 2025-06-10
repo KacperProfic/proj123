@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Username == model.Username);
         if (user == null || !BCrypt.Net.BCrypt.Verify(model.PasswordHash, user.PasswordHash))
-            return Unauthorized("Invalid credentials");
+            return Unauthorized("Błędne dane logowania");
 
         var claims = new[]
         {
@@ -60,7 +60,7 @@ public class AuthController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
         if (await _context.Users.AnyAsync(u => u.Username == model.Username))
-            return BadRequest("Username already exists");
+            return BadRequest("Nazwa użytkownika już istnieje");
         var user = new User
         {
             Username = model.Username,
@@ -69,7 +69,7 @@ public class AuthController : ControllerBase
         };
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
-        return Ok("User registered successfully");
+        return Ok("Pomyślnie zalogowano");
     }
 }
 
