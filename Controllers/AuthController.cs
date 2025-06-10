@@ -6,7 +6,7 @@ using Projekt_zaliczenie.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using BCrypt.Net; // Dodana biblioteka BCrypt
+using BCrypt.Net; 
 using System.ComponentModel.DataAnnotations;
 
 namespace Projekt_zaliczenie.Controllers;
@@ -76,7 +76,7 @@ public class AuthController : ControllerBase
 public class LoginModel
 {
     public string Username { get; set; }
-    public string PasswordHash { get; set; } // Tutaj podajesz plain text hasło
+    public string PasswordHash { get; set; } 
 }
 
 public class RegisterModel

@@ -24,7 +24,7 @@ public class MissionController : Controller
         return await _context.Missions.ToListAsync();
     }
 
-    // GET: api/mission/5 (requires login)
+    // GET: api/mission/5 
     [HttpGet("{id}")]
     [Authorize]
     public async Task<ActionResult<Mission>> GetMission(long id)
@@ -34,7 +34,7 @@ public class MissionController : Controller
         return mission;
     }
 
-    // POST: api/mission (requires login)
+    // POST: api/mission 
     [HttpPost]
     [Authorize]
     public async Task<ActionResult<Mission>> CreateMission(Mission mission)
@@ -46,7 +46,7 @@ public class MissionController : Controller
         return CreatedAtAction(nameof(GetMission), new { id = mission.Id }, mission);
     }
 
-    // PUT: api/mission/5 (requires login)
+    // PUT: api/mission/5 
     [HttpPut("{id}")]
     [Authorize]
     public async Task<IActionResult> UpdateMission(int id, Mission mission)
@@ -59,7 +59,7 @@ public class MissionController : Controller
         return NoContent();
     }
 
-    // DELETE: api/mission/5 (requires login)
+    // DELETE: api/mission/5 
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<IActionResult> DeleteMission(long id)
@@ -71,7 +71,7 @@ public class MissionController : Controller
         return NoContent();
     }
 
-    // GET: api/mission/filter?status=1 (requires login)
+    // GET: api/mission/filter?status=1 
     [HttpGet("filter")]
     [Authorize]
     public async Task<ActionResult<IEnumerable<Mission>>> FilterMissions([FromQuery(Name = "missionStatusId")] int missionStatusId)
